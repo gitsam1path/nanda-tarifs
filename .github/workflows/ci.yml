@@ -1,0 +1,53 @@
+name: CI Nanda
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+
+  qualite:
+    name: Qualité du code
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Préparer Python
+        id: prep
+        uses: ./.github/actions/preparer-python
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Afficher l'environnement
+        run: |
+          echo "Python installé : ${{ steps.prep.outputs.python-version }}"
+          echo "Cache retrouvé  : ${{ steps.prep.outputs.cache-hit }}"
+
+      - name: Vérifier le formatage
+        run: black --check --diff .
+
+  tests:
+    name: Tests unitaires
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Préparer Python
+        uses: ./.github/actions/preparer-python
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Lancer les tests
+        run: python -m pytest -v
