@@ -1,0 +1,39 @@
+name: Préparer Python
+description: Installe Python et les dépendances du projet Nanda
+
+inputs:
+  python-version:
+    description: Version de Python à installer
+    required: false
+    default: "3.12"
+  fichier-dependances:
+    description: Fichier listant les paquets à installer
+    required: false
+    default: requirements-dev.txt
+
+outputs:
+  python-version:
+    description: Version de Python réellement installée
+    value: ${{ steps.python.outputs.python-version }}
+  cache-hit:
+    description: Le cache pip a-t-il été retrouvé ?
+    value: ${{ steps.python.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    - name: Installer Python
+      id: python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: pip
+        cache-dependency-path: ${{ inputs.fichier-dependances }}
+
+    - name: Installer les dépendances
+      shell: bash
+      env:
+        FICHIER: ${{ inputs.fichier-dependances }}
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r "$FICHIER"
