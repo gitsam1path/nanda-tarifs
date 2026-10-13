@@ -3,6 +3,7 @@ name: CI Nanda
 on:
   push:
     branches: [main]
+    tags: ['v*']
     paths-ignore: ['**.md']
   pull_request:
     branches: [main]
@@ -51,3 +52,27 @@ jobs:
 
       - name: Lancer les tests
         run: python -m pytest -v
+
+  version:
+    name: Version
+    needs: [qualite, tests]
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      officielle: ${{ steps.version.outputs.officielle }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Calculer la version
+        id: version
+        uses: ./.github/actions/calculer-version
+        with:
+          version-base: ${{ vars.VERSION_BASE || '0.1' }}
+
+      - name: Publier un résumé
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          OFFICIELLE: ${{ steps.version.outputs.officielle }}
+        run: |
+          echo "## Version $VERSION" >> "$GITHUB_STEP_SUMMARY"
+          echo "Version officielle : $OFFICIELLE" >> "$GITHUB_STEP_SUMMARY"
