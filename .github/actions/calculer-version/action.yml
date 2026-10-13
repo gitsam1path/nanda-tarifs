@@ -1,0 +1,36 @@
+name: Calculer la version
+description: Détermine le numéro de version du projet Nanda
+
+inputs:
+  version-base:
+    description: Version de base utilisée en dehors des tags
+    required: false
+    default: "0.1"
+
+outputs:
+  version:
+    description: Numéro de version calculé
+    value: ${{ steps.calcul.outputs.version }}
+  officielle:
+    description: "true si la version provient d'un tag"
+    value: ${{ steps.calcul.outputs.officielle }}
+
+runs:
+  using: composite
+  steps:
+    - name: Calculer
+      id: calcul
+      shell: bash
+      env:
+        VERSION_BASE: ${{ inputs.version-base }}
+      run: |
+        if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+          VERSION="${GITHUB_REF_NAME#v}"
+          OFFICIELLE=true
+        else
+          VERSION="${VERSION_BASE}.${GITHUB_RUN_NUMBER}-${GITHUB_SHA::7}"
+          OFFICIELLE=false
+        fi
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "officielle=$OFFICIELLE" >> "$GITHUB_OUTPUT"
+        echo "Version calculée : $VERSION (officielle : $OFFICIELLE)"
