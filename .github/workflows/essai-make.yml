@@ -1,0 +1,23 @@
+name: Essai make
+
+on:
+  workflow_dispatch:
+    inputs:
+      cible:
+        description: "Cible à lancer"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  essai:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/preparer-python
+      - name: Lancer make
+        env:
+          CIBLE: ${{ inputs.cible }}
+        run: make $CIBLE
