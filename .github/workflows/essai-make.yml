@@ -17,6 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/preparer-python
+      - name: corriger le code
+        run: make corriger
       - name: Lancer make
         env:
           CIBLE: ${{ inputs.cible }}
