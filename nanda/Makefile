@@ -1,2 +1,0 @@
-presentation:
-	black --check --diff .
